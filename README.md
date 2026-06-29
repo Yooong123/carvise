@@ -1,4 +1,4 @@
-<img width="1920" height="1400" alt="PixPin_2026-06-29_12-48-07" src源代码="https://github.com/user-attachments/assets/905f7587-f9b0-4920-ae27-6b5b2408855a" /># Carvis — 本地开发服务管理工具
+# Carvis — 本地开发服务管理工具
 
 **菜维斯，为你分担一点点🤏工作**
 
