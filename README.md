@@ -4,6 +4,9 @@
 
 Carvis 是一款面向开发者的本地服务管理桌面应用，用图形化界面替代繁琐的命令行操作，让启动、监控、管理多个开发服务变得像点击按钮一样简单。
 
+<img width="1920" height="1400" alt="PixPin_2026-06-29_12-55-28" src="https://github.com/user-attachments/assets/e47a3623-00bc-44e1-82ab-65ab51d8e9ea" />
+
+
 ## 应用场景
 
 ### 早晨开工，一键启动全部
