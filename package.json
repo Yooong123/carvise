@@ -1,0 +1,84 @@
+{
+  "name": "carvis",
+  "version": "1.0.2",
+  "description": "Carvis - 本地服务管理工具",
+  "main": "electron/main.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "electron:dev": "concurrently \"vite\" \"wait-on http://localhost:5173 && electron .\"",
+    "electron:build:win": "node scripts/check-build-env.js --win && vite build && electron-builder --win",
+    "electron:build:mac": "node scripts/check-build-env.js --mac && vite build && electron-builder --mac",
+    "electron:build:all": "node scripts/check-build-env.js --all && vite build && electron-builder --win --mac",
+    "preview": "vite preview"
+  },
+  "build": {
+    "appId": "com.carvis.app",
+    "productName": "Carvis",
+    "directories": {
+      "output": "release"
+    },
+    "asar": true,
+    "files": [
+      "dist/**/*",
+      "electron/**/*",
+      "build/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "build/icon.ico",
+      "artifactName": "${productName}-${version}.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "installerIcon": "build/icon.ico",
+      "uninstallerIcon": "build/icon.ico",
+      "installerHeaderIcon": "build/icon.ico",
+      "shortcutName": "Carvis",
+      "license": null
+    },
+    "mac": {
+      "target": [
+        "dmg",
+        "zip"
+      ],
+      "icon": "build/icon.icns",
+      "category": "public.app-category.developer-tools",
+      "artifactName": "${productName}-${version}.${ext}",
+      "darkModeSupport": true,
+      "hardenedRuntime": false,
+      "identity": null
+    },
+    "dmg": {
+      "title": "Carvis ${version}",
+      "contents": [
+        {
+          "x": 130,
+          "y": 220,
+          "type": "file"
+        },
+        {
+          "x": 410,
+          "y": 220,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ]
+    }
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.2.0",
+    "concurrently": "^9.1.0",
+    "electron": "^35.7.5",
+    "electron-builder": "^25.1.8",
+    "vite": "^6.3.0",
+    "wait-on": "^8.0.3"
+  },
+  "dependencies": {
+    "vue": "^3.5.0"
+  }
+}
