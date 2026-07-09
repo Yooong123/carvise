@@ -19,7 +19,7 @@
 ---
 
 ## 界面预览
-<img width="2054" height="1534" alt="Homepage" src="https://github.com/user-attachments/assets/209e5045-52d5-4c81-b448-032c74af4053" />
+<imgwidth="2054" height="1534" alt="首页" src="https://github.com/user-attachments/assets/209e5045-52d5-4c81-b448-032c74af4053" />
 
 ---
 
@@ -27,7 +27,7 @@
 
 | **平台** | **macOS X64/ARM64** | **Windows X64/ARM64** |
 | :---: | :---: | :---: |
-| **下载** | [![macOS 下载](https://img.shields.io/badge/macOS-下载-0078d7?style=flat-square&logo=apple)](https://github.com/Yooong123/carvise) | [![Windows 下载](https://img.shields.io/badge/Windows-下载-0078d7?style=flat-square&logo=windows)](https://github.com/Yooong123/carvise) |
+| **下载** | [![macOS 下载](https://img.shields.io/badge/macOS-下载-0078d7?style=flat-square&logo=apple)](https://github.com/Yooong123/carvise) | [![Windows 下载](https://img.shields.io/badge/Windows-下载-0078d7?style=flat-square&logo=windows)](https://github.com/Yooong123/carvise/releases/tag/v0.10.0) |
 
 ---
 
@@ -46,7 +46,7 @@
 
 ### 端口清理
 
-- **占用检测** — 跨平台扫描（Windows: netstat / macOS: lsof / Linux: ss）
+- **占用检测**— 跨平台扫描（Windows：netstat / macOS：lsof / Linux：ss）
 - **智能保护** — 自动跳过由 Carvis 管理的服务端口，防止误杀
 - **一键终止** — 自动识别 PID 并执行跨平台强制终止
 
