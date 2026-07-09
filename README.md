@@ -1,4 +1,4 @@
-<img src="docs/screenshots/juese.png" alt="Carvis" width="120" height="120" />
+<div align="center"><img src="docs/screenshots/juese.png" alt="Carvis" width="120" height="120" /></div>
 
 <div align="center"><h1>Carvis — 本地开发服务管理工具</h1></div>
 
@@ -20,7 +20,7 @@
 
 ## 界面预览
 
-![Homepage](docs/screenshots/Homepage.jpg)
+![首页](docs/screenshots/Homepage.jpg)
 
 ---
 
