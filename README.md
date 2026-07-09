@@ -19,8 +19,7 @@
 ---
 
 ## 界面预览
-
-![首页](docs/screenshots/Homepage.jpg)
+<div align="center"><img src=“docs/screenshots/Homepage.jpg”/></div>
 
 ---
 
