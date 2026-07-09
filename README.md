@@ -19,7 +19,7 @@
 ---
 
 ## 界面预览
-![首页](docs/screenshots/Homepage.jpg)
+![Homepage](docs/screenshots/Homepage.jpg)
 
 ---
 
