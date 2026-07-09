@@ -1,4 +1,3 @@
-<img width="2054" height="1534" alt="Homepage" src="https://github.com/user-attachments/assets/209e5045-52d5-4c81-b448-032c74af4053" />
 <div align="center"><img src="docs/screenshots/juese.png" alt="Carvis" width="120" height="120" /></div>
 
 <div align="center"><h1>Carvis — 本地开发服务管理工具</h1></div>
@@ -20,7 +19,7 @@
 ---
 
 ## 界面预览
-![Uploading Homepage.jpg…]()
+<img width="2054" height="1534" alt="Homepage" src="https://github.com/user-attachments/assets/209e5045-52d5-4c81-b448-032c74af4053" />
 
 ---
 
