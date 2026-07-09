@@ -19,7 +19,7 @@
 ---
 
 ## 界面预览
-<imgwidth="2054" height="1534" alt="首页" src="https://github.com/user-attachments/assets/209e5045-52d5-4c81-b448-032c74af4053" />
+![首页](docs/screenshots/Homepage.jpg)
 
 ---
 
