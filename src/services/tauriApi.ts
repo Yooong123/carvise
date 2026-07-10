@@ -11,6 +11,7 @@
 
 import { invoke } from '@tauri-apps/api/core'
 import { listen } from '@tauri-apps/api/event'
+import { getCurrentWindow } from '@tauri-apps/api/window'
 
 const TIMEOUT_MS = 5000
 
@@ -66,11 +67,19 @@ type Unlisten = () => void
 
 export const tauriApi = {
   // 平台信息（对应原 window.carvisPlatform）
-  platform: {
-    isMac: /Mac/i.test(navigator.userAgent),
-    isWindows: /Win/i.test(navigator.userAgent),
-    isLinux: /Linux/i.test(navigator.userAgent),
-  },
+  // 注意：Tauri 的 macOS WebView 下 navigator.userAgent 不一定含 "Mac"，
+  // 故组合 userAgent / platform / data-platform 多信号判定，避免单一检测失灵。
+  platform: (() => {
+    const ua = navigator.userAgent || ''
+    const plt = (navigator as any).platform || navigator.userAgentData?.platform || ''
+    const dataPlat = document.documentElement.getAttribute('data-platform')
+    const isMac = /Mac/i.test(ua) || /Mac/i.test(plt) || dataPlat === 'mac'
+    return {
+      isMac,
+      isWindows: /Win/i.test(ua) || /Win/i.test(plt),
+      isLinux: /Linux/i.test(ua) || /Linux/i.test(plt),
+    }
+  })(),
 
   // ---- 配置管理 ----
   getServicesConfig() {
@@ -202,6 +211,41 @@ export const tauriApi = {
   // ---- 应用版本 ----
   getAppVersion(): Promise<string> {
     return invoke<string>('get_app_version')
+  },
+
+  // ---- macOS 标题栏背景色（跟随系统主题）----
+  /**
+   * 同步 macOS 原生透明标题栏（Overlay）的背景色。
+   * macOS 启用原生标题栏后，标题栏区域是透明的，其底色取自窗口 backgroundColor；
+   * 若窗口背景为深色（tauri.conf.json 的 #0a0e17），浅色系统下顶部会透出黑色。
+   * 因此按当前主题把窗口背景色设为浅色(#f7f8fa)/深色(#1a1b1e)，与 App 主题一致。
+   * 仅 macOS 生效，其它平台直接跳过。
+   */
+  setTitleBarColor(theme: 'light' | 'dark') {
+    // 使用 tauriApi.platform.isMac（组合 userAgent/platform/data-platform）判定，
+    // 避免单独依赖 navigator.userAgent 在 Tauri WebView 中失灵。
+    if (!tauriApi.platform.isMac) {
+      return Promise.resolve({ success: true as const })
+    }
+    const hex = theme === 'dark' ? '#1a1b1e' : '#f7f8fa'
+    const h = hex.replace('#', '')
+    const color: [number, number, number, number] = [
+      parseInt(h.slice(0, 2), 16) / 255,
+      parseInt(h.slice(2, 4), 16) / 255,
+      parseInt(h.slice(4, 6), 16) / 255,
+      1,
+    ]
+    const win = getCurrentWindow()
+    // 标准窗口（decorations:true）下，标题栏颜色由 macOS 系统 appearance 控制，
+    // setBackgroundColor 只改 webview 背后底色、不影响系统标题栏。
+    // 因此需要再用 setTheme 设置窗口 appearance：dark → 系统深色标题栏，
+    // light → 系统浅色标题栏，从而让顶部导航栏跟随 App 主题变暗/变亮。
+    const appearance = theme === 'dark' ? 'dark' : 'light'
+    return win
+      .setBackgroundColor(color)
+      .then(() => win.setTheme(appearance))
+      .then(() => ({ success: true as const }))
+      .catch((e: any) => ({ success: false, error: String(e?.message || e) }))
   },
 }
 

@@ -766,6 +766,15 @@ function applyHtmlTheme(theme) {
   } else {
     document.documentElement.removeAttribute('data-theme')
   }
+  // macOS：同步原生透明标题栏背景色，避免浅色系统下顶部透出深色窗口背景（黑边）。
+  // 系统主题切换（matchMedia change）与此处保存设置切换主题都会走到这里，故一并处理。
+  // 判定以 data-platform 属性为准（由 Rust 端在 macOS 编译时可靠注入），
+  // 不依赖 isMacPlatform 这个可能受 userAgent 检测影响而失效的布尔。
+  const isMac = isMacPlatform.value ||
+    document.documentElement.getAttribute('data-platform') === 'mac'
+  if (isMac) {
+    tauriApi.setTitleBarColor(theme)
+  }
 }
 
 /**
@@ -1372,12 +1381,14 @@ async function handleSaveConfig(payload) {
       // 保存失败：明确提示用户，避免「点了没反应、内容没保存」却无任何反馈
       const reason = result?.error || '未知错误，配置可能未写入磁盘'
       console.error('[App:handleSaveConfig] Save config failed:', reason)
-      alert('保存设置失败：' + reason)
+      // 用 Toast 而非 window.alert：Tauri 2 的 macOS WebView 未实现 window.alert，会静默失效
+      pushToast('保存设置失败：' + reason, 'error', 6000)
     }
   } catch (e) {
     // IPC 超时 / 序列化错误 / 其它异常：必须提示并关闭弹窗
     console.error('[App:handleSaveConfig] 保存过程出错:', e)
-    alert('保存设置出错：' + (e?.message || e))
+    // 用 Toast 而非 window.alert（macOS WebView 下 window.alert 无效）
+    pushToast('保存设置出错：' + (e?.message || e), 'error', 6000)
   } finally {
     // 无论成功 / 失败 / 异常，都确保弹窗关闭（修复「弹窗不关闭」）
     showSettings.value = false

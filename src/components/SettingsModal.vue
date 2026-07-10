@@ -20,6 +20,9 @@
       </div>
 
       <div class="settings-body">
+        <!-- 应用内错误提示（替代 window.alert，macOS 下 window.alert 无效） -->
+        <div v-if="errorMsg" class="settings-error-banner" @click="errorMsg = ''">{{ errorMsg }}</div>
+
         <!-- ======================== -->
         <!-- 服务管理（分组优先） -->
         <!-- ======================== -->
@@ -374,6 +377,18 @@
       </div>
     </div>
   </div>
+
+  <!-- 删除分组确认弹窗（替代 window.confirm，macOS WebView 不支持 window.confirm） -->
+  <div v-if="confirmState.show" class="confirm-overlay" @click.self="cancelDeleteGroup">
+    <div class="confirm-modal">
+      <div class="confirm-title">删除分组</div>
+      <div class="confirm-text">确定要删除分组「{{ confirmState.groupName }}」吗？分组内的服务会变为未分组状态。</div>
+      <div class="confirm-actions">
+        <button class="confirm-btn confirm-btn-cancel" @click="cancelDeleteGroup">取消</button>
+        <button class="confirm-btn confirm-btn-danger" @click="confirmDeleteGroup">删除</button>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup>
@@ -387,6 +402,12 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['close', 'save'])
+
+/** 应用内错误提示（替代 window.alert：Tauri 2 的 macOS WebView 未实现 window.alert，会静默失效） */
+const errorMsg = ref('')
+
+/** 删除分组确认弹窗状态（替代 window.confirm：macOS WebView 同样未实现，返回 undefined 会导致删除被提前取消） */
+const confirmState = reactive({ show: false, groupId: '', groupName: '' })
 
 /**
  * 应用版本号，通过 electron API 获取
@@ -624,14 +645,24 @@ function cancelRename() {
 // ========================
 
 /**
- * 删除分组
- * - 确认后移除分组
- * - 原分组内的服务变为未分组（_groupId = null）
+ * 请求删除分组：弹出应用内确认框
+ * 注意：不能用 window.confirm —— Tauri 2 的 macOS WebView 并未实现 window.confirm，
+ * 调用返回 undefined，导致 `if (!undefined) return` 直接取消删除（且 Windows 正常），
+ * 这正是 macOS 上「无法删除分组」的根因。
  */
 function deleteGroup(groupId) {
-  if (!window.confirm('确定要删除这个分组吗？分组内的服务会变为未分组状态。')) {
-    return
-  }
+  const group = localGroups.find(g => g.id === groupId)
+  confirmState.groupId = groupId
+  confirmState.groupName = group ? group.name : ''
+  confirmState.show = true
+}
+
+/**
+ * 确认删除分组（由确认弹窗的「删除」按钮触发）
+ * - 原分组内的服务变为未分组（_groupId = null）
+ */
+function confirmDeleteGroup() {
+  const groupId = confirmState.groupId
   // 将分组内所有服务的 _groupId 置空
   for (const svc of editConfig.services) {
     if (svc._groupId === groupId) {
@@ -644,6 +675,14 @@ function deleteGroup(groupId) {
     localGroups.splice(idx, 1)
   }
   delete groupExpanded[groupId]
+  cancelDeleteGroup()
+}
+
+/** 取消删除分组 */
+function cancelDeleteGroup() {
+  confirmState.show = false
+  confirmState.groupId = ''
+  confirmState.groupName = ''
 }
 
 // ========================
@@ -801,6 +840,7 @@ function isValidPort(port) {
  * 仅在用户实际修改了设置时才执行保存操作
  */
 async function handleSave() {
+  errorMsg.value = ''
   console.log('[SettingsModal] handleSave triggered')
   console.log('[SettingsModal] editConfig.services count:', editConfig.services.length)
   console.log('[SettingsModal] localGroups count:', localGroups.length)
@@ -835,7 +875,7 @@ async function handleSave() {
     const allErrors = [...idErrors, ...portErrors]
     if (allErrors.length > 0) {
       console.warn('[SettingsModal] Validation errors:', allErrors)
-      alert('配置校验失败：\n\n' + allErrors.join('\n'))
+      errorMsg.value = '配置校验失败：\n' + allErrors.join('\n')
       return
     }
 
@@ -894,7 +934,7 @@ async function handleSave() {
     console.log('[SettingsModal] emit save completed')
   } catch (e) {
     console.error('[SettingsModal] 保存设置失败:', e)
-    alert('保存设置出错: ' + (e?.message || e))
+    errorMsg.value = '保存设置出错: ' + (e?.message || e)
   }
 }
 
@@ -1156,5 +1196,89 @@ function handleCancel() {
    ======================== */
 .group-content .service-edit-card:last-child {
   margin-bottom: 0;
+}
+
+/* ========================
+   应用内提示与确认弹窗（替代 window.alert / window.confirm）
+   ======================== */
+
+/* 保存校验/错误提示横幅 */
+.settings-error-banner {
+  margin: 0 var(--spacing-lg) var(--spacing-md);
+  padding: 10px 14px;
+  background: rgba(245, 63, 63, 0.08);
+  border: 1px solid rgba(245, 63, 63, 0.3);
+  border-radius: var(--radius-md);
+  color: var(--accent-danger, #f53f3f);
+  font-size: 13px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  cursor: pointer;
+}
+
+/* 删除分组确认弹窗遮罩 */
+.confirm-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.confirm-modal {
+  width: 320px;
+  max-width: 90%;
+  background: var(--bg-card, #ffffff);
+  border: 1px solid var(--border-color, #e3e6ec);
+  border-radius: var(--radius-lg, 14px);
+  padding: 20px;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.28);
+}
+
+.confirm-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary, #1c2027);
+  margin-bottom: 10px;
+}
+
+.confirm-text {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text-secondary, #5b6270);
+  margin-bottom: 18px;
+}
+
+.confirm-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.confirm-btn {
+  padding: 7px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  border: 1px solid var(--border-color, #e3e6ec);
+  border-radius: var(--radius-sm, 8px);
+  background: transparent;
+  color: var(--text-primary, #1c2027);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.confirm-btn:hover {
+  background: var(--bg-tertiary, #f0f2f5);
+}
+
+.confirm-btn-danger {
+  border-color: rgba(245, 63, 63, 0.4);
+  color: var(--accent-danger, #f53f3f);
+}
+
+.confirm-btn-danger:hover {
+  background: rgba(245, 63, 63, 0.08);
 }
 </style>

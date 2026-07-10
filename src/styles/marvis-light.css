@@ -133,7 +133,7 @@ code {
 
 /* Sidebar Header - 品牌标识 */
 .sidebar-header {
-  padding: var(--spacing-2xl) var(--spacing-lg) var(--spacing-lg);
+  padding: var(--spacing-lg) var(--spacing-lg) var(--spacing-md);
   display: flex;
   align-items: center;
   gap: var(--spacing-sm);
@@ -630,7 +630,7 @@ code {
   flex: 1;
   display: flex;
   flex-direction: column;
-  padding: var(--spacing-3xl) var(--spacing-2xl);
+  padding: var(--spacing-lg) var(--spacing-2xl);
   gap: var(--spacing-xl);
   overflow: hidden;
   min-width: 0;
@@ -2490,23 +2490,49 @@ code {
    当渲染进程检测到 macOS 时，在 html 上设置 data-platform="mac"
    ================================================ */
 
-/* macOS：保留系统红绿灯窗口控件，隐藏自定义窗口按钮 */
+/* macOS：标准可见标题栏（Visible）适配。
+   TitleBarStyle::Visible 下，系统标题栏是不透明的独立条（含红绿灯），
+   webview 内容从标题栏下方开始，因此给 sidebar / main-content 顶部留出
+   38px padding，避免内容被系统标题栏覆盖。
+   由于 title bar 本身不透明，无法像 Overlay 那样透出 webview 内容做左右分色；
+   这是 macOS 原生且稳定的外观，红绿灯、拖拽、圆角均由系统提供。 */
+
+/* macOS：隐藏自定义窗口按钮，使用系统红绿灯 */
 [data-platform="mac"] .window-controls {
   display: none;
 }
 
-/* macOS：侧边栏 header 不需要额外左侧 padding
-   padding-top (28px) 已足够避开红绿灯区域 (红绿灯位于 y≈14, 内容起始于 y≈28) */
+/* macOS：隐藏自定义拖拽区域，系统标题栏本身可拖拽 */
+[data-platform="mac"] .drag-region {
+  display: none;
+}
+
+/* macOS：当前使用 set_decorations(true) 标准窗口装饰（lib.rs 中
+   set_title_bar_style 已被注释），macOS 标准标题栏会把 webview 内容
+   自动推到标题栏下方，因此【不需要】再额外留 28px 避让。
+   之前的 28px 是 Overlay 方案的残留，会造成标题栏到内容的双重空白。
+   这里仅保留极小的过渡留白（8px）。 */
+[data-platform="mac"] .sidebar,
+[data-platform="mac"] .main-content {
+  padding-top: 10px;
+}
+
+/* macOS：sidebar header 顶部 padding 收紧，紧接在系统标题栏下方、
+   红绿灯的下方，仅保留极小的过渡留白。 */
 [data-platform="mac"] .sidebar-header {
+  padding-top: 4px;
+  padding-bottom: 10px;
   padding-left: var(--spacing-lg);
 }
 
-/* macOS：拖拽区域不需要那么高，红绿灯区域需要避开 */
-[data-platform="mac"] .drag-region {
-  height: 38px;
-  left: 70px;
+/* macOS：header 整体不标记为拖拽区域；但 logo/version 区域可拖拽 */
+[data-platform="mac"] .sidebar-header {
+  -webkit-app-region: no-drag;
 }
-
+[data-platform="mac"] .sidebar-logo,
+[data-platform="mac"] .sidebar-version {
+  -webkit-app-region: drag;
+}
 /* ================================================
    启动加载遮罩（防止窗口黑屏与空状态闪烁）
    背景色与 tauri.conf.json 的 backgroundColor 一致 (#0a0e17)
@@ -2552,22 +2578,6 @@ code {
   to {
     transform: rotate(360deg);
   }
-}
-
-/* macOS：主内容区顶部 padding 减少，红绿灯区域已有固有高度 */
-[data-platform="mac"] .main-content {
-  padding-top: var(--spacing-lg);
-}
-
-/* macOS：侧边栏 header 整体不标记为拖拽区域，避免红绿灯区域被覆盖 */
-[data-platform="mac"] .sidebar-header {
-  -webkit-app-region: no-drag;
-}
-
-/* macOS：恢复品牌区域的可拖拽性（logo 和版本号区域） */
-[data-platform="mac"] .sidebar-logo,
-[data-platform="mac"] .sidebar-version {
-  -webkit-app-region: drag;
 }
 
 /* ========================
