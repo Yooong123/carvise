@@ -27,7 +27,7 @@
 
 | **平台** | **macOS X64/ARM64** | **Windows X64/ARM64** |
 | :---: | :---: | :---: |
-| **下载** | [![macOS 下载](https://img.shields.io/badge/macOS-下载-0078d7?style=flat-square&logo=apple)](https://github.com/Yooong123/carvise) | [![Windows 下载](https://img.shields.io/badge/Windows-下载-0078d7?style=flat-square&logo=windows)](https://github.com/Yooong123/carvise/releases/tag/v0.10.0) |
+| **下载** | [![macOS 下载](https://img.shields.io/badge/macOS-下载-0078d7?style=flat-square&logo=apple)](https://github.com/Yooong123/carvise/releases/tag/v0.10.0) | [![Windows 下载](https://img.shields.io/badge/Windows-下载-0078d7?style=flat-square&logo=windows)](https://github.com/Yooong123/carvise/releases/tag/v0.10.0) |
 
 ---
 
